@@ -1,17 +1,19 @@
 /*
  * Rule.cpp
  *
- *  Created on: May 3, 2013
- *      Author: ALEX-2010
+ *  Created on: 4 May 2013
+ *      Author: Mostafa Mokhtar
  */
 
 #include "Rule.h"
 
-Rule::Rule() {
+Rule::Rule(string nam) {
 	// TODO Auto-generated constructor stub
-
+	name = nam;
+	isTerminal = false;
 }
 
 Rule::~Rule() {
 	// TODO Auto-generated destructor stub
 }
+
