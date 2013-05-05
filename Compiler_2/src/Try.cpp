@@ -13,6 +13,7 @@
 #include "CFG_Parser.h"
 using namespace std;
 
+/*
 int main() {
 
 	CFG_Parser f("example.txt");
@@ -24,3 +25,4 @@ int main() {
 
 	return 0;
 }
+*/
