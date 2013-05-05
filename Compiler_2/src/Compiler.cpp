@@ -16,14 +16,8 @@ using namespace std;
 
 int main(int argc, char *argv[]) {
 
-//	if (argc < 3) {
-//		cout << "please Enter the rule file name and the code file name"
-//				<< endl;
-//	} else {
-
 	InputFileParser* file = new InputFileParser();
-//	file->readFile("input.txt");
-		file->readFile(argv[1]);
+	file->readFile("input.txt");
 	NFSA* n = new NFSA(*file);
 	n->generateNFSA();
 	n->printErrors();
@@ -37,10 +31,8 @@ int main(int argc, char *argv[]) {
 		dfa_Eng->minimize_table();
 
 		Simulator* s = new Simulator(n, dfa_Eng);
-//		s->fileReader("code.txt");
-		s->fileReader(argv[2]);
+		s->fileReader("code.txt");
 
-//		}
 	}
 	cout << "END" << endl;
 	return 0;
