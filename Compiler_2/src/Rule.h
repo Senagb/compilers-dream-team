@@ -7,7 +7,8 @@
 
 #ifndef RULE_H_
 #define RULE_H_
-#include "Includes.h"
+#include "vector"
+#include "string"
 
 using namespace std;
 
@@ -17,7 +18,7 @@ public:
 	vector< vector< Rule* > > children;
 	string name;
 	bool isTerminal;
-	Rule();
+	Rule(string name);
 	virtual ~Rule();
 };
 
