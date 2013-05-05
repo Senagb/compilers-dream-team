@@ -1,22 +1,29 @@
 /*
- * CFG_Parser.h
+ * FileParser.h
  *
- *  Created on: May 3, 2013
- *      Author: ALEX-2010
+ *  Created on: 4 May 2013
+ *      Author: Mostafa Mokhtar
  */
 
-#ifndef CFG_PARSER_H_
-#define CFG_PARSER_H_
+#ifndef FILEPARSER_H_
+#define FILEPARSER_H_
+
+#include <string>
 #include "Rule.h"
-#include "Includes.h"
+
 using namespace std;
 
 class CFG_Parser {
 public:
+	char* filePath;
+	CFG_Parser(char* path);
 	vector<Rule*> rulesTable;
 	Rule* lambda;
-	CFG_Parser();
+	void startParser();
+	void parse_Line(string line);
+	int getIndexIntable(string name);
+	void printOut();
 	virtual ~CFG_Parser();
 };
 
-#endif /* CFG_PARSER_H_ */
+#endif /* FILEPARSER_H_ */
