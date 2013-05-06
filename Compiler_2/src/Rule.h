@@ -7,9 +7,7 @@
 
 #ifndef RULE_H_
 #define RULE_H_
-#include "vector"
-#include "string"
-
+#include "Includes.h"
 using namespace std;
 
 class Rule {
