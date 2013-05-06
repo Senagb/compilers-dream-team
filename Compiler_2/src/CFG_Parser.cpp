@@ -6,9 +6,7 @@
  */
 
 #include "CFG_Parser.h"
-#include <iostream>
-#include <fstream>
-#include <vector>
+
 CFG_Parser::CFG_Parser(char* path) {
 	// TODO Auto-generated constructor stub
 	filePath = path;
@@ -238,6 +236,84 @@ void CFG_Parser::printOut(){
 
 			}
 		}
+}
 
+bool CFG_Parser::compare(vector<Rule*>* first, vector<Rule*>* second, int length)
+{
+	for(int i=0; i<=length; i++)
+	{
+		if(i>= second->size() || strcmp(first->at(i)->name.c_str(), second->at(i)->name.c_str()) != 0)
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+void CFG_Parser::left_factoring()
+{
+	int size = rulesTable.size();
+	Rule* pntr;
+	vector< Rule* >* vct_pntr;
+	vector<vector<Rule*>* >* pntrs = new vector<vector<Rule*>* >;
+	int matches =0;
+	int counter =0;
+	stringstream ss;
+	for(int i=0; i<  rulesTable.size(); i++)
+	{
+		pntr = rulesTable.at(i);
+		counter =0;
+		for(unsigned int j=0; j<pntr->children.size(); j++)
+		{
+			vct_pntr = &(pntr->children.at(j));
+			for(int k =vct_pntr->size()-1; k>-1; k--)
+			{
+				matches = 0;
+				pntrs->clear();
+				for(int m=j; m<pntr->children.size(); m++)
+				{
+					if(compare(vct_pntr, &(pntr->children.at(m)), k)){
+						matches++;
+						pntrs->push_back(&(pntr->children.at(m)));
+					}
+				}
+				if(matches > 1)
+				{
+					ss << counter;
+					Rule* newRule = new Rule(pntr->name+ss.str());
+					counter++;
+					ss.str("");
+					ss.clear();
+					for(int n=0; n<pntrs->size(); n++)
+					{
+						if(k == pntrs->at(n)->size()-1)
+						{
+							vector<Rule*> to_add;
+							to_add.push_back(lambda);
+							newRule->children.push_back(to_add);
+						}else
+						{
+							vector<Rule*> to_add;
+							for(int p=k+1; p<pntrs->at(n)->size();p++)
+							{
+								to_add.push_back(pntrs->at(n)->at(p));
+							}
+							newRule->children.push_back(to_add);
+						}
+						if(n==0)
+						{
+							while(pntrs->at(n)->size() != k+1)
+							{
+								pntrs->at(n)->pop_back();
+							}
+							pntrs->at(n)->push_back(newRule);
+						}else
+							pntrs->at(n)->clear();
+					}
+					rulesTable.push_back(newRule);
+				}
+			}
+		}
+	}
 }
 
