@@ -8,7 +8,7 @@
 #ifndef FILEPARSER_H_
 #define FILEPARSER_H_
 
-#include <string>
+#include "Includes.h"
 #include "Rule.h"
 
 using namespace std;
@@ -23,6 +23,8 @@ public:
 	void parse_Line(string line);
 	int getIndexIntable(string name);
 	void printOut();
+	void left_factoring();
+	bool compare(vector<Rule*>* first, vector<Rule*>* second, int length);
 	virtual ~CFG_Parser();
 };
 
