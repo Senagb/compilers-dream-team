@@ -24,6 +24,7 @@ public:
 	int getIndexIntable(string name);
 	void printOut();
 	void left_factoring();
+	void left_recursion();
 	bool compare(vector<Rule*>* first, vector<Rule*>* second, int length);
 	virtual ~CFG_Parser();
 };
