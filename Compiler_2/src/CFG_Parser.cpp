@@ -252,7 +252,6 @@ bool CFG_Parser::compare(vector<Rule*>* first, vector<Rule*>* second, int length
 
 void CFG_Parser::left_factoring()
 {
-	int size = rulesTable.size();
 	Rule* pntr;
 	vector< Rule* >* vct_pntr;
 	vector<vector<Rule*>* >* pntrs = new vector<vector<Rule*>* >;
@@ -314,6 +313,70 @@ void CFG_Parser::left_factoring()
 				}
 			}
 		}
+	}
+}
+
+void CFG_Parser::left_recursion()
+{
+	//substitution
+	//Rule tempRule("");
+	int size = rulesTable.size();
+	for(int i=0; i<size && (!rulesTable.at(i)->isTerminal) ; i++)
+	{
+		Rule tempRule(""); tempRule = *(rulesTable.at(i));
+		for(int j=0; j<i && (!rulesTable.at(j)->isTerminal); j++)
+		{
+			for(int k=0; k<tempRule.children.size(); k++)
+			{
+				if(strcmp(rulesTable.at(j)->name.c_str(), tempRule.children.at(k).at(0)->name.c_str())==0)
+				{
+					tempRule.children.at(k).erase(tempRule.children.at(k).begin());
+					for(int l=0; l<rulesTable.at(j)->children.size(); l++)
+					{
+						vector<Rule*> to_add;
+						for(int m=0; m<rulesTable.at(j)->children.at(l).size(); m++)
+							to_add.push_back(rulesTable.at(j)->children.at(l).at(m));
+
+						for(int m=0; m<tempRule.children.at(k).size(); m++)
+							to_add.push_back(tempRule.children.at(k).at(m));
+
+						tempRule.children.push_back(to_add);
+					}
+					tempRule.children.erase(tempRule.children.begin()+k);
+				}
+			}
+		}
+		Rule* newRule = new Rule(tempRule.name+"'");
+		for(int j=0; j<tempRule.children.size(); j++)
+		{
+			if(strcmp(tempRule.name.c_str(), tempRule.children.at(j).at(0)->name.c_str()) == 0)
+			{
+				vector<Rule*> to_add;
+				for(int k=1; k<tempRule.children.at(j).size(); k++)
+				{
+					to_add.push_back(tempRule.children.at(j).at(k));
+				}
+				to_add.push_back(newRule);
+				newRule->children.push_back(to_add);
+				tempRule.children.at(j).clear();
+			}else
+			{
+				tempRule.children.at(j).push_back(newRule);
+			}
+		}
+		vector<Rule*> to_add;
+		to_add.push_back(lambda);
+		newRule->children.push_back(to_add);
+		if(newRule->children.size()>1)
+		{
+			//rulesTable.erase(rulesTable.begin()+i);
+			//rulesTable.insert(rulesTable.begin()+i, &tempRule);
+			rulesTable.at(i)->children.clear();
+			for(int j=0; j<tempRule.children.size(); j++)
+				rulesTable.at(i)->children.push_back(tempRule.children.at(j));
+			rulesTable.push_back(newRule);
+		}
+
 	}
 }
 
