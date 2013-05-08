@@ -14,26 +14,26 @@
 #include "DFAEngine.h"
 using namespace std;
 
-int main(int argc, char *argv[]) {
-
-	InputFileParser* file = new InputFileParser();
-	file->readFile("input.txt");
-	NFSA* n = new NFSA(*file);
-	n->generateNFSA();
-	n->printErrors();
-	cout << "hello world" << endl;
-
-	if (n->isValid()) {
-		DFA_Engine* dfa_Eng = new DFA_Engine(n, n->getDefinitions().size());
-		dfa_Eng->getFirstDFA_State();
-		dfa_Eng->generateTable();
-		dfa_Eng->print();
-		dfa_Eng->minimize_table();
-
-		Simulator* s = new Simulator(n, dfa_Eng);
-		s->fileReader("code.txt");
-
-	}
-	cout << "END" << endl;
-	return 0;
-}
+//int main(int argc, char *argv[]) {
+//
+//	InputFileParser* file = new InputFileParser();
+//	file->readFile("input.txt");
+//	NFSA* n = new NFSA(*file);
+//	n->generateNFSA();
+//	n->printErrors();
+//	cout << "hello world" << endl;
+//
+//	if (n->isValid()) {
+//		DFA_Engine* dfa_Eng = new DFA_Engine(n, n->getDefinitions().size());
+//		dfa_Eng->getFirstDFA_State();
+//		dfa_Eng->generateTable();
+//		dfa_Eng->print();
+//		dfa_Eng->minimize_table();
+//
+//		Simulator* s = new Simulator(n, dfa_Eng);
+//		s->fileReader("code.txt");
+//
+//	}
+//	cout << "END" << endl;
+//	return 0;
+//}

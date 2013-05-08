@@ -97,10 +97,12 @@ void CFG_Parser::parse_Line(string line) {
 			if (newName.length() != 0) {
 
 				int index = getIndexIntable(newName);
-				if(newName.length()==2&&newName[0]=='\\'&&newName[1]=='L'){
+				if (newName.length() == 2 && newName[0] == '\\'
+						&& newName[1] == 'L') {
 					newRule->children.at(newRule->children.size() - 1).push_back(
-												lambda);
-				}else if (index == -1) {
+							lambda);
+					newRule->hasEpsilon = true;
+				} else if (index == -1) {
 					Rule* r;
 					r = new Rule(newName);
 					if (r->name[0] == '\'') {
@@ -115,7 +117,7 @@ void CFG_Parser::parse_Line(string line) {
 							rulesTable.at(index));
 
 				}
-}
+			}
 
 			vector<Rule*> setOfRules;
 			newRule->children.push_back(setOfRules);
@@ -129,10 +131,12 @@ void CFG_Parser::parse_Line(string line) {
 
 				int index = getIndexIntable(newName);
 
-				if(newName.length()==2&&newName[0]=='\\'&&newName[1]=='L'){
-									newRule->children.at(newRule->children.size() - 1).push_back(
-																lambda);
-								}else if (index == -1) {
+				if (newName.length() == 2 && newName[0] == '\\'
+						&& newName[1] == 'L') {
+					newRule->children.at(newRule->children.size() - 1).push_back(
+							lambda);
+					newRule->hasEpsilon = true;
+				} else if (index == -1) {
 					Rule* r;
 					r = new Rule(newName);
 					rulesTable.push_back(r);
@@ -148,9 +152,7 @@ void CFG_Parser::parse_Line(string line) {
 
 				}
 
-
 			}
-
 
 			newName = "";
 		}
@@ -160,10 +162,11 @@ void CFG_Parser::parse_Line(string line) {
 	if (newName.length() != 0) {
 
 		int index = getIndexIntable(newName);
-		if(newName.length()==2&&newName[0]=='\\'&&newName[1]=='L'){
-							newRule->children.at(newRule->children.size() - 1).push_back(
-														lambda);
-						}else if (index == -1) {
+		if (newName.length() == 2 && newName[0] == '\\' && newName[1] == 'L') {
+			newRule->children.at(newRule->children.size() - 1).push_back(
+					lambda);
+			newRule->hasEpsilon = true;
+		} else if (index == -1) {
 			Rule* r;
 			r = new Rule(newName);
 			if (r->name[0] == '\'') {
@@ -204,109 +207,98 @@ int CFG_Parser::getIndexIntable(string name) {
 	return -1;
 }
 
-void CFG_Parser::printOut(){
+void CFG_Parser::printOut() {
 
-	unsigned int i,j , k;
+	unsigned int i, j, k;
 	string printOut = "";
-		for (i = 0; i < rulesTable.size(); ++i) {
-			Rule* r = rulesTable.at(i);
-			printOut = r->name + " ::= {";
+	for (i = 0; i < rulesTable.size(); ++i) {
+		Rule* r = rulesTable.at(i);
+		printOut = r->name + " ::= {";
 
-			for (j = 0; j < r->children.size(); ++j) {
-				printOut += "{" ;
-				vector<Rule*> setOfRules = r->children.at(j);
-				for (k = 0; k < setOfRules.size(); ++k) {
-					if(setOfRules.at(k)==lambda){
-					printOut =printOut +", "+ setOfRules.at(k)->name +"[ it is lamda ] ";
-				}else{
-					printOut =printOut +", "+ setOfRules.at(k)->name ;
-					}
+		for (j = 0; j < r->children.size(); ++j) {
+			printOut += "{";
+			vector<Rule*> setOfRules = r->children.at(j);
+			for (k = 0; k < setOfRules.size(); ++k) {
+				if (setOfRules.at(k) == lambda) {
+					printOut = printOut + ", " + setOfRules.at(k)->name
+							+ "[ it is lamda ] ";
+				} else {
+					printOut = printOut + ", " + setOfRules.at(k)->name;
 				}
-				printOut += "}," ;
 			}
-			printOut += "}" ;
-
-			if(r->isTerminal){
-			cout<<printOut<< "it is terminal" <<endl;
-			}else if(r==lambda){
-				cout<<printOut<< "  it contain lamda "<<endl;
-
-			}else{
-				cout<<printOut<<endl;
-
-			}
+			printOut += "},";
 		}
+		printOut += "}";
+
+		if (r->isTerminal) {
+			cout << printOut << "it is terminal" << endl;
+		} else if (r == lambda) {
+			cout << printOut << "  it contain lamda " << endl;
+
+		} else {
+			cout << printOut << endl;
+
+		}
+	}
 }
 
-bool CFG_Parser::compare(vector<Rule*>* first, vector<Rule*>* second, int length)
-{
-	for(int i=0; i<=length; i++)
-	{
-		if(i>= second->size() || strcmp(first->at(i)->name.c_str(), second->at(i)->name.c_str()) != 0)
-		{
+bool CFG_Parser::compare(vector<Rule*>* first, vector<Rule*>* second,
+		int length) {
+	for (int i = 0; i <= length; i++) {
+		if (i >= second->size()
+				|| strcmp(first->at(i)->name.c_str(),
+						second->at(i)->name.c_str()) != 0) {
 			return false;
 		}
 	}
 	return true;
 }
 
-void CFG_Parser::left_factoring()
-{
+void CFG_Parser::left_factoring() {
 	Rule* pntr;
-	vector< Rule* >* vct_pntr;
-	vector<vector<Rule*>* >* pntrs = new vector<vector<Rule*>* >;
-	int matches =0;
-	int counter =0;
+	vector<Rule*>* vct_pntr;
+	vector<vector<Rule*>*>* pntrs = new vector<vector<Rule*>*>;
+	int matches = 0;
+	int counter = 0;
 	stringstream ss;
-	for(int i=0; i<  rulesTable.size(); i++)
-	{
+	for (int i = 0; i < rulesTable.size(); i++) {
 		pntr = rulesTable.at(i);
-		counter =0;
-		for(unsigned int j=0; j<pntr->children.size(); j++)
-		{
+		counter = 0;
+		for (unsigned int j = 0; j < pntr->children.size(); j++) {
 			vct_pntr = &(pntr->children.at(j));
-			for(int k =vct_pntr->size()-1; k>-1; k--)
-			{
+			for (int k = vct_pntr->size() - 1; k > -1; k--) {
 				matches = 0;
 				pntrs->clear();
-				for(int m=j; m<pntr->children.size(); m++)
-				{
-					if(compare(vct_pntr, &(pntr->children.at(m)), k)){
+				for (int m = j; m < pntr->children.size(); m++) {
+					if (compare(vct_pntr, &(pntr->children.at(m)), k)) {
 						matches++;
 						pntrs->push_back(&(pntr->children.at(m)));
 					}
 				}
-				if(matches > 1)
-				{
+				if (matches > 1) {
 					ss << counter;
-					Rule* newRule = new Rule(pntr->name+ss.str());
+					Rule* newRule = new Rule(pntr->name + ss.str());
 					counter++;
 					ss.str("");
 					ss.clear();
-					for(int n=0; n<pntrs->size(); n++)
-					{
-						if(k == pntrs->at(n)->size()-1)
-						{
+					for (int n = 0; n < pntrs->size(); n++) {
+						if (k == pntrs->at(n)->size() - 1) {
 							vector<Rule*> to_add;
 							to_add.push_back(lambda);
 							newRule->children.push_back(to_add);
-						}else
-						{
+						} else {
 							vector<Rule*> to_add;
-							for(int p=k+1; p<pntrs->at(n)->size();p++)
-							{
+							for (int p = k + 1; p < pntrs->at(n)->size(); p++) {
 								to_add.push_back(pntrs->at(n)->at(p));
 							}
 							newRule->children.push_back(to_add);
 						}
-						if(n==0)
-						{
-							while(pntrs->at(n)->size() != k+1)
-							{
+						if (n == 0) {
+							while (pntrs->at(n)->size() != k + 1) {
 								pntrs->at(n)->pop_back();
 							}
 							pntrs->at(n)->push_back(newRule);
-						}else
+						} else
 							pntrs->at(n)->clear();
 					}
 					rulesTable.push_back(newRule);
@@ -316,63 +308,60 @@ void CFG_Parser::left_factoring()
 	}
 }
 
-void CFG_Parser::left_recursion()
-{
+void CFG_Parser::left_recursion() {
 	//substitution
 	//Rule tempRule("");
 	int size = rulesTable.size();
-	for(int i=0; i<size && (!rulesTable.at(i)->isTerminal) ; i++)
-	{
-		Rule tempRule(""); tempRule = *(rulesTable.at(i));
-		for(int j=0; j<i && (!rulesTable.at(j)->isTerminal); j++)
-		{
-			for(int k=0; k<tempRule.children.size(); k++)
-			{
-				if(strcmp(rulesTable.at(j)->name.c_str(), tempRule.children.at(k).at(0)->name.c_str())==0)
-				{
-					tempRule.children.at(k).erase(tempRule.children.at(k).begin());
-					for(int l=0; l<rulesTable.at(j)->children.size(); l++)
-					{
+	for (int i = 0; i < size && (!rulesTable.at(i)->isTerminal); i++) {
+		Rule tempRule("");
+		tempRule = *(rulesTable.at(i));
+		for (int j = 0; j < i && (!rulesTable.at(j)->isTerminal); j++) {
+			for (int k = 0; k < tempRule.children.size(); k++) {
+				if (strcmp(rulesTable.at(j)->name.c_str(),
+						tempRule.children.at(k).at(0)->name.c_str()) == 0) {
+					tempRule.children.at(k).erase(
+							tempRule.children.at(k).begin());
+					for (int l = 0; l < rulesTable.at(j)->children.size();
+							l++) {
 						vector<Rule*> to_add;
-						for(int m=0; m<rulesTable.at(j)->children.at(l).size(); m++)
-							to_add.push_back(rulesTable.at(j)->children.at(l).at(m));
+						for (int m = 0;
+								m < rulesTable.at(j)->children.at(l).size();
+								m++)
+							to_add.push_back(
+									rulesTable.at(j)->children.at(l).at(m));
 
-						for(int m=0; m<tempRule.children.at(k).size(); m++)
+						for (int m = 0; m < tempRule.children.at(k).size(); m++)
 							to_add.push_back(tempRule.children.at(k).at(m));
 
 						tempRule.children.push_back(to_add);
 					}
-					tempRule.children.erase(tempRule.children.begin()+k);
+					tempRule.children.erase(tempRule.children.begin() + k);
 				}
 			}
 		}
-		Rule* newRule = new Rule(tempRule.name+"'");
-		for(int j=0; j<tempRule.children.size(); j++)
-		{
-			if(strcmp(tempRule.name.c_str(), tempRule.children.at(j).at(0)->name.c_str()) == 0)
-			{
+		Rule* newRule = new Rule(tempRule.name + "'");
+		for (int j = 0; j < tempRule.children.size(); j++) {
+			if (strcmp(tempRule.name.c_str(),
+					tempRule.children.at(j).at(0)->name.c_str()) == 0) {
 				vector<Rule*> to_add;
-				for(int k=1; k<tempRule.children.at(j).size(); k++)
-				{
+				for (int k = 1; k < tempRule.children.at(j).size(); k++) {
 					to_add.push_back(tempRule.children.at(j).at(k));
 				}
 				to_add.push_back(newRule);
 				newRule->children.push_back(to_add);
 				tempRule.children.at(j).clear();
-			}else
-			{
+			} else {
 				tempRule.children.at(j).push_back(newRule);
 			}
 		}
 		vector<Rule*> to_add;
 		to_add.push_back(lambda);
 		newRule->children.push_back(to_add);
-		if(newRule->children.size()>1)
-		{
+		if (newRule->children.size() > 1) {
 			//rulesTable.erase(rulesTable.begin()+i);
 			//rulesTable.insert(rulesTable.begin()+i, &tempRule);
 			rulesTable.at(i)->children.clear();
-			for(int j=0; j<tempRule.children.size(); j++)
+			for (int j = 0; j < tempRule.children.size(); j++)
 				rulesTable.at(i)->children.push_back(tempRule.children.at(j));
 			rulesTable.push_back(newRule);
 		}
