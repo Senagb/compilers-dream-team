@@ -8,6 +8,7 @@
 #include "FirstSet.h"
 
 FirstSet::FirstSet() {
+	hasEpsilon = false;
 }
 
 FirstSet::~FirstSet() {
