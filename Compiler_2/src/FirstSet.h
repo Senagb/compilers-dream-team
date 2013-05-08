@@ -17,7 +17,7 @@ class FirstSet {
 public:
 	vector<Rule*> first;
 	string name;
-	bool hasEpsilon = false;
+	bool hasEpsilon;
 	FirstSet();
 	virtual ~FirstSet();
 };
