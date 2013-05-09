@@ -18,6 +18,10 @@ parseTablebuilder::parseTablebuilder(vector<Rule *>* R, Rule * doller) {
 		}
 	}
 	terminals.push_back(dollerSing);
+
+	Table = new vector<Rule*>*[nonTerminals.size()];
+	for(int i=0; i<nonTerminals.size(); i++)
+		Table[i] = new vector<Rule*>[terminals.size()];
 }
 
 void parseTablebuilder::makeFirst(Rule* lambda) {
