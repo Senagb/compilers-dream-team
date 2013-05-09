@@ -11,6 +11,7 @@ CFG_Parser::CFG_Parser(char* path) {
 	// TODO Auto-generated constructor stub
 	filePath = path;
 	lambda = new Rule("\\L");
+	DollerSign = new Rule("$");
 }
 
 CFG_Parser::~CFG_Parser() {

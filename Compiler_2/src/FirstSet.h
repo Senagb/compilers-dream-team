@@ -8,9 +8,12 @@
 #ifndef FIRSTSET_H_
 #define FIRSTSET_H_
 #include "Includes.h"
+
 using namespace std;
+class Rule;
 
 class FirstSet {
+
 public:
 	vector<Rule*> first;
 	bool hasEpsilon;

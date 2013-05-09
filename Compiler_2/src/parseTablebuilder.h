@@ -7,17 +7,16 @@
 
 #ifndef PARSETABLEBUILDER_H_
 #define PARSETABLEBUILDER_H_
-#include "Includes.h"
 #include "Rule.h"
 
 class parseTablebuilder {
 public:
 	vector<Rule*> * Rules;
-	Rule* dollerSign;
+	Rule* dollerSing;
 	parseTablebuilder(vector<Rule *>* Rules);
 	virtual ~parseTablebuilder();
 	void makeFirst(Rule* lambda);
-	void makeFollow(Rule * Lambda);
+	void makeFollow(Rule * Lambda, Rule* d);
 	void printer();
 
 private:

@@ -23,7 +23,7 @@ int main() {
 	parseTablebuilder builder(&f.rulesTable);
 	cout << "constructor" << endl;
 	builder.makeFirst(f.lambda);
-//	builder.makeFollow(f.lambda);
+	builder.makeFollow(f.lambda, f.DollerSign);
 	builder.printer();
 	return 0;
 }

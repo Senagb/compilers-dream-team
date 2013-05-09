@@ -19,6 +19,7 @@ public:
 	CFG_Parser(char* path);
 	vector<Rule*> rulesTable;
 	Rule* lambda;
+	Rule* DollerSign;
 	void startParser();
 	void parse_Line(string line);
 	int getIndexIntable(string name);
