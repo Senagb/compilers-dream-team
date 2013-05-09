@@ -21,6 +21,7 @@ public:
 	void makeFollow(Rule * Lambda);
 	void printer();
 	void  makeParseTable ();
+	vector<Rule*>** Table;
 
 private:
 	void findFollow(Rule* lambda, Rule* cu, Rule* l);
