@@ -12,10 +12,14 @@
 using namespace std;
 class Rule;
 
+struct FsetHolder {
+	Rule* rule;
+	int index;
+};
 class FirstSet {
 
 public:
-	vector<Rule*> first;
+	vector<FsetHolder> first;
 	bool hasEpsilon;
 	FirstSet();
 	virtual ~FirstSet();

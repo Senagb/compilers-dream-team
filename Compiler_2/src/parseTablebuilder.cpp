@@ -7,9 +7,17 @@
 
 #include "parseTablebuilder.h"
 
-parseTablebuilder::parseTablebuilder(vector<Rule *>* Rule) {
-	Rules = Rule;
-
+parseTablebuilder::parseTablebuilder(vector<Rule *>* R, Rule * doller) {
+	Rules = R;
+	dollerSing = doller;
+	for (int i = 0; i < Rules->size(); ++i) {
+		if (Rules->at(i)->isTerminal) {
+			terminals.push_back(Rules->at(i));
+		} else {
+			nonTerminals.push_back(Rules->at(i));
+		}
+	}
+	terminals.push_back(dollerSing);
 }
 
 void parseTablebuilder::makeFirst(Rule* lambda) {
@@ -25,14 +33,19 @@ void parseTablebuilder::makeFirst(Rule* lambda) {
 			for (int p = 0; p < childernOfChildern.size(); ++p) {
 				Rule * chHolder = childernOfChildern.at(p);
 				if (chHolder->isTerminal) {
-
-					addToFirst(&holder->first, chHolder);
+					FsetHolder set;
+					set.rule = chHolder;
+					set.index = p;
+					addToFirst(&holder->first, set);
 					break;
 				} else if (!chHolder->isTerminal) {
 					if (chHolder == lambda) {
-						addToFirst(&holder->first, lambda);
+						FsetHolder set;
+						set.rule = chHolder;
+						set.index = p;
+						addToFirst(&holder->first, set);
 					} else {
-						vector<Rule *> oldFirst = chHolder->first.first;
+						vector<FsetHolder> oldFirst = chHolder->first.first;
 						for (int k = 0; k < oldFirst.size(); ++k) {
 							addToFirst(&holder->first, oldFirst.at(k));
 						}
@@ -46,18 +59,21 @@ void parseTablebuilder::makeFirst(Rule* lambda) {
 			if (ruleCounter == childernOfChildern.size()
 					&& childernOfChildern.size() != 0
 					&& holder->hasEpsilon == false) {
-				holder->first.first.push_back(lambda);
+				FsetHolder set;
+				set.rule = lambda;
+				set.index = -1;
+				holder->first.first.push_back(set);
 				holder->hasEpsilon = true;
 			}
 
 		}
 	}
 }
-void parseTablebuilder::addToFirst(FirstSet* f, Rule* r) {
+void parseTablebuilder::addToFirst(FirstSet* f, FsetHolder r) {
 	bool found = false;
-	vector<Rule*> start = f->first;
+	vector<FsetHolder> start = f->first;
 	for (int i = 0; i < start.size(); ++i) {
-		if (r == start.at(i)) {
+		if (r.rule == start.at(i).rule) {
 			found = true;
 			break;
 		}
@@ -67,32 +83,37 @@ void parseTablebuilder::addToFirst(FirstSet* f, Rule* r) {
 
 }
 
-void parseTablebuilder::makeFollow(Rule * lambda, Rule* d) {
-	dollerSing = d;
+void parseTablebuilder::makeFollow(Rule * lambda) {
+
 	Rules->at(0)->follow.followTerminals.push_back(dollerSing);
 	for (int i = 0; i < Rules->size(); ++i) {
 		Rule *currentRule = Rules->at(i);
-		findFollow(lambda, currentRule);
+		if (!currentRule->isTerminal)
+			findFollow(lambda, currentRule, currentRule);
 	}
 
 }
 
-void parseTablebuilder::findFollow(Rule * lambda, Rule *current) {
-	for (int j = 0; j < Rules->size(); ++j) {
+void parseTablebuilder::findFollow(Rule * lambda, Rule *current, Rule* last) {
+
+	for (int j = 0; j < Rules->size(); j++) {
 		Rule* checkingRule = Rules->at(j);
-		vector<vector<Rule *> > childern = current->children;
+		vector<vector<Rule *> > childern = checkingRule->children;
 		for (int i = 0; i < childern.size(); i++) {
 			vector<Rule *> childernOfChildern = childern.at(i);
-			for (int p = 0; p < childernOfChildern.size(); ++p) {
+			for (int p = 0; p < childernOfChildern.size(); p++) {
 				Rule * chHolder = childernOfChildern.at(p);
-				cout << current->name << "  --- " << chHolder->name << "  ---- "
-						<< checkingRule->name << endl;
 				if (current == chHolder) {
+					//it is the last in the group find follow of the rule
 					if (p == childernOfChildern.size() - 1) {
-						findFollow(lambda, checkingRule);
-						addFollow(checkingRule->follow.followTerminals,
-								current);
+						if (checkingRule == last)
+							return;
+						findFollow(lambda, checkingRule, current);
+						addFollowWithFollow(
+								checkingRule->follow.followTerminals, current,
+								lambda);
 					} else {
+						// if the next is terminal then add it
 						if (childernOfChildern.at(p + 1)->isTerminal) {
 							bool found = false;
 							vector<Rule*> start =
@@ -107,20 +128,27 @@ void parseTablebuilder::findFollow(Rule * lambda, Rule *current) {
 							if (!found)
 								current->follow.followTerminals.push_back(
 										childernOfChildern.at(p + 1));
+							p++;
 						} else {
+							//if nonterminal and has epsilon move
 							if (childernOfChildern.at(p + 1)->hasEpsilon) {
 								addFollow(
 										childernOfChildern.at(p + 1)->first.first,
+										current, lambda);
+								if (checkingRule == last)
+									return;
+								findFollow(lambda, childernOfChildern.at(p + 1),
 										current);
-								findFollow(lambda,
-										childernOfChildern.at(p + 1));
-								addFollow(
+								addFollowWithFollow(
 										childernOfChildern.at(p + 1)->follow.followTerminals,
-										current);
+										current, lambda);
+								p++;
 							} else {
+								//if it hasn't got epsilon move
 								addFollow(
 										childernOfChildern.at(p + 1)->first.first,
-										current);
+										current, lambda);
+								p++;
 							}
 						}
 
@@ -133,7 +161,28 @@ void parseTablebuilder::findFollow(Rule * lambda, Rule *current) {
 
 }
 
-void parseTablebuilder::addFollow(vector<Rule*> r, Rule * addto) {
+void parseTablebuilder::addFollow(vector<FsetHolder> r, Rule * addto,
+		Rule* lambda) {
+
+	for (int j = 0; j < r.size(); ++j) {
+
+		bool found = false;
+		vector<Rule*> start = addto->follow.followTerminals;
+		for (int i = 0; i < start.size(); ++i) {
+			if (r.at(j).rule == start.at(i)) {
+				found = true;
+				break;
+			}
+		}
+		if (!found)
+			if (r.at(j).rule != lambda) {
+				addto->follow.followTerminals.push_back(r.at(j).rule);
+			}
+	}
+
+}
+void parseTablebuilder::addFollowWithFollow(vector<Rule *> r, Rule * addto,
+		Rule* lambda) {
 	for (int j = 0; j < r.size(); ++j) {
 
 		bool found = false;
@@ -145,30 +194,33 @@ void parseTablebuilder::addFollow(vector<Rule*> r, Rule * addto) {
 			}
 		}
 		if (!found)
-			addto->follow.followTerminals.push_back(r.at(j));
+			if (r.at(j) != lambda) {
+				addto->follow.followTerminals.push_back(r.at(j));
+			}
 	}
 }
-
 void parseTablebuilder::printer() {
 	for (int i = 0; i < Rules->size(); ++i) {
 		FirstSet f = Rules->at(i)->first;
-		vector<Rule *> temp = f.first;
-//		cout << Rules->at(i)->name << " ";
+		vector<FsetHolder> temp = f.first;
+		cout << Rules->at(i)->name << " ";
 		for (int j = 0; j < temp.size(); ++j) {
-			cout << temp.at(j)->name << " ";
+			cout << temp.at(j).rule->name << " ";
 		}
-		if (temp.size() > 0)
-			cout << endl;
+//		if (temp.size() > 0)
+		cout << endl;
 	}
 	cout << "_________________***********________________________" << endl;
+
 	for (int i = 0; i < Rules->size(); ++i) {
 		FollowSet f = Rules->at(i)->follow;
 		vector<Rule *> temp = f.followTerminals;
+		cout << Rules->at(i)->name << " ";
 		for (int j = 0; j < temp.size(); ++j) {
 			cout << temp.at(j)->name << " ";
 		}
-		if (temp.size() > 0)
-			cout << endl;
+//		if (temp.size() > 0)
+		cout << endl;
 	}
 }
 parseTablebuilder::~parseTablebuilder() {

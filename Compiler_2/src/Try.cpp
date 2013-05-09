@@ -20,10 +20,10 @@ int main() {
 	f.startParser();
 	f.printOut();
 	cout << "******************************" << endl;
-	parseTablebuilder builder(&f.rulesTable);
+	parseTablebuilder builder(&f.rulesTable, f.DollerSign);
 	cout << "constructor" << endl;
 	builder.makeFirst(f.lambda);
-	builder.makeFollow(f.lambda, f.DollerSign);
+	builder.makeFollow(f.lambda);
 	builder.printer();
 	return 0;
 }
