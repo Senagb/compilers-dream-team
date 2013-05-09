@@ -7,7 +7,6 @@
 
 #ifndef RULE_H_
 #define RULE_H_
-#include "Includes.h"
 #include "FirstSet.h"
 using namespace std;
 
@@ -18,6 +17,7 @@ public:
 	bool isTerminal;
 	bool hasEpsilon;
 	FirstSet first;
+	FollowSet follow;
 	Rule(string name);
 	virtual ~Rule();
 };

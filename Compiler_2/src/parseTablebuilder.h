@@ -9,14 +9,21 @@
 #define PARSETABLEBUILDER_H_
 #include "Includes.h"
 #include "Rule.h"
-#include "FirstSet.h"
 
 class parseTablebuilder {
 public:
+	vector<Rule*> * Rules;
+	Rule* dollerSign;
 	parseTablebuilder(vector<Rule *>* Rules);
 	virtual ~parseTablebuilder();
 	void makeFirst(Rule* lambda);
+	void makeFollow(Rule * Lambda);
 	void printer();
+
+private:
+	void findFollow(Rule* lambda, Rule* cu);
+	void addFollow(vector<Rule *> r, Rule * addto);
+	void addToFirst(FirstSet* f, Rule* r);
 
 };
 

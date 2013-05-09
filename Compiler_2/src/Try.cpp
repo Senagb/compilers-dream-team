@@ -21,9 +21,9 @@ int main() {
 	f.printOut();
 	cout << "******************************" << endl;
 	parseTablebuilder builder(&f.rulesTable);
+	cout << "constructor" << endl;
 	builder.makeFirst(f.lambda);
+//	builder.makeFollow(f.lambda);
 	builder.printer();
-	return 0;
-
 	return 0;
 }
