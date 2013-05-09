@@ -20,6 +20,7 @@ public:
 	vector<Rule*> rulesTable;
 	Rule* lambda;
 	Rule* DollerSign;
+	Rule * sync;
 	void startParser();
 	void parse_Line(string line);
 	int getIndexIntable(string name);

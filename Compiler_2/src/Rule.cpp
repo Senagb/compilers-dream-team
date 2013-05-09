@@ -11,6 +11,7 @@ Rule::Rule(string nam) {
 	// TODO Auto-generated constructor stub
 	name = nam;
 	isTerminal = false;
+	hasEpsilon = false;
 }
 
 Rule::~Rule() {

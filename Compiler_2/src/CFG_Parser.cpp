@@ -12,6 +12,7 @@ CFG_Parser::CFG_Parser(char* path) {
 	filePath = path;
 	lambda = new Rule("\\L");
 	DollerSign = new Rule("$");
+	sync = new Rule("->");
 }
 
 CFG_Parser::~CFG_Parser() {

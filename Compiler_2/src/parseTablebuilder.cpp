@@ -7,9 +7,12 @@
 
 #include "parseTablebuilder.h"
 
-parseTablebuilder::parseTablebuilder(vector<Rule *>* R, Rule * doller) {
+parseTablebuilder::parseTablebuilder(vector<Rule *>* R, Rule * doller, Rule * L,
+		Rule* s) {
 	Rules = R;
 	dollerSing = doller;
+	lambda = L;
+	sync = s;
 	for (int i = 0; i < Rules->size(); ++i) {
 		if (Rules->at(i)->isTerminal) {
 			terminals.push_back(Rules->at(i));
@@ -20,11 +23,11 @@ parseTablebuilder::parseTablebuilder(vector<Rule *>* R, Rule * doller) {
 	terminals.push_back(dollerSing);
 
 	Table = new vector<Rule*>*[nonTerminals.size()];
-	for(int i=0; i<nonTerminals.size(); i++)
-		Table[i] = new vector<Rule*>[terminals.size()];
+	for (int i = 0; i < nonTerminals.size(); i++)
+		Table[i] = new vector<Rule*> [terminals.size()];
 }
 
-void parseTablebuilder::makeFirst(Rule* lambda) {
+void parseTablebuilder::makeFirst() {
 	Rule * holder;
 	int ruleCounter = 0;
 	for (int i = Rules->size() - 1; i >= 0; i--) {
@@ -37,21 +40,15 @@ void parseTablebuilder::makeFirst(Rule* lambda) {
 			for (int p = 0; p < childernOfChildern.size(); ++p) {
 				Rule * chHolder = childernOfChildern.at(p);
 				if (chHolder->isTerminal) {
-					FsetHolder set;
-					set.rule = chHolder;
-					set.index = p;
-					addToFirst(&holder->first, set);
+					addToFirst(&holder->first, chHolder, j);
 					break;
 				} else if (!chHolder->isTerminal) {
 					if (chHolder == lambda) {
-						FsetHolder set;
-						set.rule = chHolder;
-						set.index = p;
-						addToFirst(&holder->first, set);
+						addToFirst(&holder->first, chHolder, j);
 					} else {
 						vector<FsetHolder> oldFirst = chHolder->first.first;
 						for (int k = 0; k < oldFirst.size(); ++k) {
-							addToFirst(&holder->first, oldFirst.at(k));
+							addToFirst(&holder->first, oldFirst.at(k).rule, j);
 						}
 						if (!chHolder->hasEpsilon) {
 							break;
@@ -73,21 +70,24 @@ void parseTablebuilder::makeFirst(Rule* lambda) {
 		}
 	}
 }
-void parseTablebuilder::addToFirst(FirstSet* f, FsetHolder r) {
+void parseTablebuilder::addToFirst(FirstSet* f, Rule* r, int j) {
 	bool found = false;
 	vector<FsetHolder> start = f->first;
 	for (int i = 0; i < start.size(); ++i) {
-		if (r.rule == start.at(i).rule) {
+		if (r == start.at(i).rule) {
 			found = true;
 			break;
 		}
 	}
-	if (!found)
-		f->first.push_back(r);
-
+	if (!found) {
+		FsetHolder newone;
+		newone.rule = r;
+		newone.index = j;
+		f->first.push_back(newone);
+	}
 }
 
-void parseTablebuilder::makeFollow(Rule * lambda) {
+void parseTablebuilder::makeFollow() {
 
 	Rules->at(0)->follow.followTerminals.push_back(dollerSing);
 	for (int i = 0; i < Rules->size(); ++i) {
@@ -203,6 +203,51 @@ void parseTablebuilder::addFollowWithFollow(vector<Rule *> r, Rule * addto,
 			}
 	}
 }
+
+void parseTablebuilder::makeParseTable() {
+
+	for (int i = 0; i < Rules->size(); ++i) {
+		if (!Rules->at(i)->isTerminal) {
+			vector<FsetHolder> firstSet = Rules->at(i)->first.first;
+			int row = getRow(Rules->at(i));
+			for (int j = 0; j < firstSet.size(); ++j) {
+				FsetHolder set = firstSet.at(j);
+				if (set.rule != lambda) {
+					int column = getColumn(set.rule);
+					cout << row << " " << column << " " << i << " " << set.index
+							<< endl;
+					Table[row][column] = Rules->at(i)->children.at(set.index);
+				}
+			}
+			vector<Rule *> followSet = Rules->at(i)->follow.followTerminals;
+			for (int j = 0; j < followSet.size(); ++j) {
+				int column = getColumn(followSet.at(j));
+				vector<Rule *> temp;
+				if (Rules->at(i)->hasEpsilon) {
+					temp.push_back(lambda);
+				} else {
+					temp.push_back(sync);
+				}
+				Table[row][column] = temp;
+			}
+		}
+	}
+
+}
+int parseTablebuilder::getRow(Rule* r) {
+	for (int i = 0; i < nonTerminals.size(); ++i) {
+		if (r == nonTerminals.at(i))
+			return i;
+	}
+	return -1;
+}
+int parseTablebuilder::getColumn(Rule * r) {
+	for (int i = 0; i < terminals.size(); i++) {
+		if (r == terminals.at(i))
+			return i;
+	}
+	return -1;
+}
 void parseTablebuilder::printer() {
 	for (int i = 0; i < Rules->size(); ++i) {
 		FirstSet f = Rules->at(i)->first;
@@ -211,7 +256,6 @@ void parseTablebuilder::printer() {
 		for (int j = 0; j < temp.size(); ++j) {
 			cout << temp.at(j).rule->name << " ";
 		}
-//		if (temp.size() > 0)
 		cout << endl;
 	}
 	cout << "_________________***********________________________" << endl;
@@ -223,9 +267,23 @@ void parseTablebuilder::printer() {
 		for (int j = 0; j < temp.size(); ++j) {
 			cout << temp.at(j)->name << " ";
 		}
-//		if (temp.size() > 0)
 		cout << endl;
 	}
+
+	cout
+			<< "-----------------------------Table---------------------------------------"
+			<< endl;
+	for (int i = 0; i < nonTerminals.size(); ++i) {
+		for (int j = 0; j < terminals.size(); ++j) {
+			vector<Rule *> cell = Table[i][j];
+			for (int p = 0; p < cell.size(); ++p) {
+				cout << cell.at(p)->name;
+			}
+			cout << " ";
+		}
+		cout << endl;
+	}
+
 }
 parseTablebuilder::~parseTablebuilder() {
 // TODO Auto-generated destructor stub
