@@ -394,11 +394,11 @@ void CFG_Parser::left_recursion()
 	//substitution
 	//Rule tempRule("");
 	int size = rulesTable.size();
-	for (int i = 0; i < size && (!rulesTable.at(i)->isTerminal); i++)
+	for (int i = 0; i < rulesTable.size() ; i++)
 	{
 		Rule tempRule("");
 		tempRule = *(rulesTable.at(i));
-		for (int j = 0; j < i && (!rulesTable.at(j)->isTerminal); j++)
+		for (int j = 0; j < i ; j++)
 		{
 			for (int k = 0; k < tempRule.children.size(); k++)
 			{
