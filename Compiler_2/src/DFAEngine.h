@@ -48,5 +48,6 @@ public:
 
 
 };
+static DFA_Engine* dfa_Eng;
 
 #endif /* DFAENGINE_H_ */

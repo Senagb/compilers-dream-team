@@ -46,5 +46,6 @@ private:
 	void combine(string id, string data, string type);
 
 };
+static InputFileParser* file;
 
 #endif /* INPUTFILEPARSER_H_ */

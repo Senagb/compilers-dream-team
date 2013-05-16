@@ -61,5 +61,6 @@ class NFSA
 		void signal_error(vector<string> errors, parsed current, int index);
 
 	};
+static NFSA* n;
 
 #endif /* NFSA_H_ */

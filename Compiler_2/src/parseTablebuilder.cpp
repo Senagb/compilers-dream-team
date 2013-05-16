@@ -32,7 +32,7 @@ void parseTablebuilder::makeFirst() {
 	int ruleCounter = 0;
 	for (int i = Rules->size() - 1; i >= 0; i--) {
 		holder = Rules->at(i);
-
+		cout << Rules->at(i)->name << " " << endl;
 		vector<vector<Rule *> > childern = holder->children;
 		for (int j = 0; j < childern.size(); j++) {
 			vector<Rule *> childernOfChildern = childern.at(j);
@@ -214,8 +214,6 @@ void parseTablebuilder::makeParseTable() {
 				FsetHolder set = firstSet.at(j);
 				if (set.rule != lambda) {
 					int column = getColumn(set.rule);
-					cout << row << " " << column << " " << i << " " << set.index
-							<< endl;
 					Table[row][column] = Rules->at(i)->children.at(set.index);
 				}
 			}
@@ -249,37 +247,46 @@ int parseTablebuilder::getColumn(Rule * r) {
 	return -1;
 }
 void parseTablebuilder::printer() {
-	for (int i = 0; i < Rules->size(); ++i) {
-		FirstSet f = Rules->at(i)->first;
-		vector<FsetHolder> temp = f.first;
-		cout << Rules->at(i)->name << " ";
-		for (int j = 0; j < temp.size(); ++j) {
-			cout << temp.at(j).rule->name << " ";
+	cout << "First SET " << endl;
+	for (int i = 0; i < Rules->size(); ++i)
+		if (!Rules->at(i)->isTerminal) {
+			FirstSet f = Rules->at(i)->first;
+			vector<FsetHolder> temp = f.first;
+			cout << Rules->at(i)->name << " ";
+			for (int j = 0; j < temp.size(); ++j) {
+				cout << "&" << temp.at(j).rule->name << " ";
+			}
+			cout << endl;
 		}
-		cout << endl;
-	}
 	cout << "_________________***********________________________" << endl;
+	cout << "FOLLOW SET" << endl;
 
-	for (int i = 0; i < Rules->size(); ++i) {
-		FollowSet f = Rules->at(i)->follow;
-		vector<Rule *> temp = f.followTerminals;
-		cout << Rules->at(i)->name << " ";
-		for (int j = 0; j < temp.size(); ++j) {
-			cout << temp.at(j)->name << " ";
+	for (int i = 0; i < Rules->size(); ++i)
+		if (!Rules->at(i)->isTerminal) {
+			FollowSet f = Rules->at(i)->follow;
+			vector<Rule *> temp = f.followTerminals;
+			cout << Rules->at(i)->name << " ";
+			for (int j = 0; j < temp.size(); ++j) {
+				cout << "	" << temp.at(j)->name << " ";
+			}
+			cout << endl;
 		}
-		cout << endl;
-	}
 
 	cout
 			<< "-----------------------------Table---------------------------------------"
 			<< endl;
+
 	for (int i = 0; i < nonTerminals.size(); ++i) {
+		cout << nonTerminals.at(i)->name << " :" << endl;
 		for (int j = 0; j < terminals.size(); ++j) {
 			vector<Rule *> cell = Table[i][j];
+			cout << "		For Terminal" << terminals.at(j)->name << ": of size "
+					<< cell.size() << " ::";
+
 			for (int p = 0; p < cell.size(); ++p) {
-				cout << cell.at(p)->name;
+				cout << cell.at(p)->name << ",";
 			}
-			cout << " ";
+			cout << endl;
 		}
 		cout << endl;
 	}

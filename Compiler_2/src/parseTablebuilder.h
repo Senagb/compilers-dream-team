@@ -26,7 +26,7 @@ public:
 	void makeParseTable();
 	vector<Rule*>** Table;
 
-private:
+public:
 	void findFollow(Rule* lambda, Rule* cu, Rule* l);
 	void addFollow(vector<FsetHolder> r, Rule * addto, Rule* lambda);
 	void addFollowWithFollow(vector<Rule *> r, Rule * addto, Rule* lambda);

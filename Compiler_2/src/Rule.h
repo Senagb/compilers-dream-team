@@ -14,6 +14,7 @@ class Rule {
 public:
 	vector<vector<Rule*> > children;
 	string name;
+	int index;
 	bool isTerminal;
 	bool hasEpsilon;
 	FirstSet first;
