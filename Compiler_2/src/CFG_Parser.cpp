@@ -351,6 +351,7 @@ void CFG_Parser::left_factoring()
 							vector<Rule*> to_add;
 							to_add.push_back(lambda);
 							newRule->children.push_back(to_add);
+							newRule->hasEpsilon = true;
 						} else
 						{
 							vector<Rule*> to_add;
@@ -447,6 +448,7 @@ void CFG_Parser::left_recursion()
 		vector<Rule*> to_add;
 		to_add.push_back(lambda);
 		newRule->children.push_back(to_add);
+		newRule->hasEpsilon = true;
 		if (newRule->children.size() > 1)
 		{
 			//rulesTable.erase(rulesTable.begin()+i);
