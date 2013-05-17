@@ -32,7 +32,7 @@ void parseTablebuilder::makeFirst() {
 	int ruleCounter = 0;
 	for (int i = Rules->size() - 1; i >= 0; i--) {
 		holder = Rules->at(i);
-		cout << Rules->at(i)->name << " " << endl;
+//		cout << Rules->at(i)->name << " " << endl;
 		vector<vector<Rule *> > childern = holder->children;
 		for (int j = 0; j < childern.size(); j++) {
 			vector<Rule *> childernOfChildern = childern.at(j);
@@ -205,9 +205,9 @@ void parseTablebuilder::addFollowWithFollow(vector<Rule *> r, Rule * addto,
 }
 
 void parseTablebuilder::makeParseTable() {
-
 	for (int i = 0; i < Rules->size(); ++i) {
 		if (!Rules->at(i)->isTerminal) {
+			cout << Rules->at(i)->name << "" << endl;
 			vector<FsetHolder> firstSet = Rules->at(i)->first.first;
 			int row = getRow(Rules->at(i));
 			for (int j = 0; j < firstSet.size(); ++j) {
@@ -221,12 +221,14 @@ void parseTablebuilder::makeParseTable() {
 			for (int j = 0; j < followSet.size(); ++j) {
 				int column = getColumn(followSet.at(j));
 				vector<Rule *> temp;
-				if (Rules->at(i)->hasEpsilon) {
-					temp.push_back(lambda);
-				} else {
-					temp.push_back(sync);
+				if (Table[row][column].size() == 0) {
+					if (Rules->at(i)->hasEpsilon) {
+						temp.push_back(lambda);
+					} else {
+						temp.push_back(sync);
+					}
+					Table[row][column] = temp;
 				}
-				Table[row][column] = temp;
 			}
 		}
 	}
@@ -276,14 +278,14 @@ void parseTablebuilder::printer() {
 			<< "-----------------------------Table---------------------------------------"
 			<< endl;
 
-	for (int i = 0; i < nonTerminals.size(); ++i) {
+	for (int i = 0; i < nonTerminals.size(); i++) {
 		cout << nonTerminals.at(i)->name << " :" << endl;
-		for (int j = 0; j < terminals.size(); ++j) {
+		for (int j = 0; j < terminals.size(); j++) {
 			vector<Rule *> cell = Table[i][j];
 			cout << "		For Terminal" << terminals.at(j)->name << ": of size "
 					<< cell.size() << " ::";
 
-			for (int p = 0; p < cell.size(); ++p) {
+			for (int p = 0; p < cell.size(); p++) {
 				cout << cell.at(p)->name << ",";
 			}
 			cout << endl;

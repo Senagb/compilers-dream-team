@@ -23,6 +23,8 @@ using namespace std;
 #define SYNC_STATE 3
 #define LAMDA 4
 #define CONT 0;
+ void open_files();
+ void close_files();
 struct p_Simulator
 	{
 		vector<Rule*> stack;

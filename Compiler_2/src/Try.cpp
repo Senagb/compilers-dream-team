@@ -37,8 +37,8 @@ int main() {
 	bool result = part1(&k);
 	CFG_Parser f("example.txt");
 	f.startParser();
-	f.left_factoring();
 	f.left_recursion();
+	f.left_factoring();
 	f.printOut();
 	cout << "******************************" << endl;
 
@@ -50,7 +50,7 @@ int main() {
 	builder.printer();
 	cout << "p_Simulator Creation" << endl;
 
-	//	vector<string> k = vector<string>();
+//	vector<string> k = vector<string>();
 //	k.push_back("'('");
 //	k.push_back("'('");
 //
@@ -66,12 +66,10 @@ int main() {
 //	k.push_back("')'");
 //
 //	k.push_back("'$'");
-//
-//	p_Simulator p_sim = p_Simulator(&builder, k);
-//	cout << "Start Simulation" << endl;
-//	p_sim.simulate();
-//	cout << "p_Simulator Print" << endl;
-//	p_sim.print();
+
+	p_Simulator p_sim = p_Simulator(&builder, k);
+	cout << "Start Simulation" << endl;
+	p_sim.simulate();
 
 	cout << "END of Compilers" << endl;
 	return 0;

@@ -8,6 +8,35 @@
 #include "p_Simulator.h"
 using namespace std;
 
+static ofstream steps, result_stream;
+static char* steps_file = "parser_steps.txt";
+static char* output_file = "parser_output.txt";
+void open_files()
+{
+	steps.open(steps_file);
+	steps << "Step by Step description" << endl;
+	steps << "CFG Parser of File code.txt with input CFG example.txt" << endl;
+	steps << "*******************************************************" << endl;
+	result_stream.open(output_file);
+	result_stream << "Result Description" << endl;
+	result_stream << "CFG Parser of File code.txt with input CFG example.txt"
+	        << endl;
+	result_stream << "*******************************************************"
+	        << endl;
+
+}
+void close_files()
+{
+	steps << "*****************************************************" << endl;
+	steps << "END OF STEPS" << endl;
+	steps.close();
+	result_stream << "*****************************************************"
+	        << endl;
+	result_stream << "END OF RESULT" << endl;
+
+	result_stream.close();
+}
+
 p_Simulator::p_Simulator(parseTablebuilder* table, vector<string> inputString)
 {
 	input = vector<Rule*>();
@@ -24,6 +53,7 @@ p_Simulator::p_Simulator(parseTablebuilder* table, vector<string> inputString)
 	c_state = CONT;
 
 	construct(inputString); // gives each terminal\non-terminal an index , and build the input
+
 }
 
 void p_Simulator::construct(vector<string> inputString)
@@ -82,7 +112,7 @@ void p_Simulator::signal_error(int ERROR_TYPE)
 	switch (ERROR_TYPE) {
 		case TERMINAL_ERROR:
 			error_message =
-			        "ERROR : The Top of the stack is a Terminal '"
+			        "ERROR : Terminal Error :The Top of the stack is a Terminal '"
 			                + stack.back()->name
 			                + "', which doesn't match with the current input '"
 			                + input.back()->name
@@ -90,12 +120,13 @@ void p_Simulator::signal_error(int ERROR_TYPE)
 			break;
 		case NONTERMINAL_ERROR:
 			error_message =
-			        "ERROR : The Top of the stack is a NON-Terminal '"
+			        "ERROR : Non Terminal Error : The Top of the stack is a NON-Terminal '"
 			                + stack.back()->name + "', the current input  '"
 			                + input.back()->name
 			                + "' is not in the First of this non-terminal, searching for a synch. token, neglect input symbol\n";
 			break;
 		case UNKOWN_ERROR:
+			error_message = "PANIC ERROR : unknown error \n";
 			break;
 		case INPUT:
 			error_message =
@@ -115,7 +146,14 @@ void p_Simulator::signal_error(int ERROR_TYPE)
 			}
 			error_message += "\n";
 			break;
+		case SYNC_STATE:
+			error_message +=
+			        "SYNC terminal found ,  the non terminal will be removed"
+			                + stack.back()->name + "&&" + input.back()->name
+			                + "\n";
+			break;
 		default:
+			error_message = "PANIC ERROR : error not handled \n";
 
 			break;
 	}
@@ -175,9 +213,8 @@ int p_Simulator::expand()
 		//TODO
 		if (compare(stack.back()->name, input.back()->name))
 			return MATCH;
-		signal_error(TERMINAL_ERROR);
-		stack.pop_back();
-		return UNKOWN_ERROR;
+
+		return TERMINAL_ERROR;
 	} else
 	{
 		if (stack.back() == parseTable->sync)
@@ -188,7 +225,7 @@ int p_Simulator::expand()
 		if (stack.back() == parseTable->lambda)
 		{
 			//TODO
-			return UNKOWN_ERROR;
+			return LAMDA;
 
 		}
 		if (stack.back() == parseTable->dollerSing)
@@ -198,6 +235,7 @@ int p_Simulator::expand()
 		}
 		int i = parseTable->getRow(stack.back());
 		int j = input.back()->index;
+
 //		cout << stack.back()->name << "&&" << input.back()->name << endl;
 //		cout << parseTable->nonTerminals.at(i)->name << "&&"
 //		        << parseTable->terminals.at(j)->name << endl;
@@ -228,14 +266,18 @@ void p_Simulator::simulate()
 	//TODO
 	stack.push_back(parseTable->dollerSing);
 	stack.push_back(parseTable->nonTerminals.at(0));
-
+	open_files();
 	string _name;
 	log("");
 	int x, y;
 	vector<Rule*> cell;
+	int count = 0;
+	bool handled = true;
 	while (stack.size() != 0 && input.size() != 0)
 	{
-		periodic_print();
+		if (handled)
+			periodic_print();
+		handled = true;
 		int _case = expand();
 		switch (_case) {
 			case MATCH:
@@ -284,13 +326,20 @@ void p_Simulator::simulate()
 				        "SYNC terminal found ,  the non terminal will be removed"
 				                + stack.back()->name + "&&" + input.back()->name
 				                + "\n");
+				signal_error(SYNC_STATE);
 				cout << result.back();
 				stack.pop_back();
 
 				//TODO
 				break;
-
+			case TERMINAL_ERROR:
+				signal_error(TERMINAL_ERROR);
+				stack.pop_back();
+				break;
 			default:
+				handled = false;
+				periodic_print();
+				count++;
 				break;
 		}
 	}
@@ -302,6 +351,10 @@ void p_Simulator::simulate()
 	{
 		signal_error(INPUT);
 	}
+
+	cout << "# of not handled cases =" << count << endl;
+	print();
+	close_files();
 }
 string get(string first)
 {
@@ -318,18 +371,30 @@ string get(string first)
 void p_Simulator::periodic_print()
 {
 	cout << "**********************PERIODIC PRINT*******************" << endl;
-
+	steps << "**********************PERIODIC PRINT*******************" << endl;
 	cout << "Input Stack" << endl;
+	steps << "Input Stack" << endl;
 	for (int i = input.size() - 1; i >= 0; i--)
+	{
 		cout << get(input.at(i)->name) << ",";
+		steps << get(input.at(i)->name) << ",";
+	}
 	cout << endl;
+	steps << endl;
 
 	cout << "Symbol Stack" << endl;
+	steps << "Symbol Stack" << endl;
 	for (int i = stack.size() - 1; i >= 0; i--)
+	{
 		cout << get(stack.at(i)->name) << ",";
+		steps << get(stack.at(i)->name) << ",";
+	}
+	steps << endl;
 	cout << endl;
 
 	cout << "**********************END OF PERIODIC PRINT*******************"
+	        << endl;
+	steps << "**********************END OF PERIODIC PRINT*******************"
 	        << endl;
 
 }
@@ -338,17 +403,29 @@ void p_Simulator::print()
 	if (valid)
 	{
 		cout << "*********************VALID*********************" << endl;
+		result_stream << "*********************VALID*********************"
+		        << endl;
 		for (int i = 0; i < result.size(); i++)
 		{
 			cout << result.at(i) << endl;
+			result_stream << result.at(i) << endl;
 		}
+		result_stream << "*********************VALID*********************"
+		        << endl;
 		cout << "*********************VALID*********************" << endl;
 	} else
 	{
+		result_stream << "********************ERROR***********************"
+		        << endl;
 		cout << "********************ERROR***********************" << endl;
 		for (int i = 0; i < error.size(); i++)
+		{
 			cout << error.at(i) << endl;
+			result_stream << error.at(i) << endl;
+		}
 		cout << "********************ERROR***********************" << endl;
+		result_stream << "********************ERROR***********************"
+		        << endl;
 
 	}
 }
