@@ -7,8 +7,8 @@
 
 #include "parseTablebuilder.h"
 
-parseTablebuilder::parseTablebuilder(vector<Rule *>* R, Rule * doller, Rule * L,
-		Rule* s) {
+parseTablebuilder::parseTablebuilder(vector<Rule *>* R, Rule * doller,
+		Rule * L, Rule* s) {
 	Rules = R;
 	dollerSing = doller;
 	lambda = L;
@@ -32,7 +32,7 @@ void parseTablebuilder::makeFirst() {
 	int ruleCounter = 0;
 	for (int i = Rules->size() - 1; i >= 0; i--) {
 		holder = Rules->at(i);
-//		cout << Rules->at(i)->name << " " << endl;
+		//		cout << Rules->at(i)->name << " " << endl;
 		vector<vector<Rule *> > childern = holder->children;
 		for (int j = 0; j < childern.size(); j++) {
 			vector<Rule *> childernOfChildern = childern.at(j);
@@ -58,8 +58,8 @@ void parseTablebuilder::makeFirst() {
 				}
 			}
 			if (ruleCounter == childernOfChildern.size()
-					&& childernOfChildern.size() != 0
-					&& holder->hasEpsilon == false) {
+					&& childernOfChildern.size() != 0 && holder->hasEpsilon
+					== false) {
 				FsetHolder set;
 				set.rule = lambda;
 				set.index = -1;
@@ -123,8 +123,7 @@ void parseTablebuilder::findFollow(Rule * lambda, Rule *current, Rule* last) {
 							vector<Rule*> start =
 									current->follow.followTerminals;
 							for (int i = 0; i < start.size(); ++i) {
-								if (childernOfChildern.at(p + 1)
-										== start.at(i)) {
+								if (childernOfChildern.at(p + 1) == start.at(i)) {
 									found = true;
 									break;
 								}
@@ -141,8 +140,8 @@ void parseTablebuilder::findFollow(Rule * lambda, Rule *current, Rule* last) {
 										current, lambda);
 								if (checkingRule == last)
 									return;
-								findFollow(lambda, childernOfChildern.at(p + 1),
-										current);
+								findFollow(lambda,
+										childernOfChildern.at(p + 1), current);
 								addFollowWithFollow(
 										childernOfChildern.at(p + 1)->follow.followTerminals,
 										current, lambda);
@@ -214,7 +213,12 @@ void parseTablebuilder::makeParseTable() {
 				FsetHolder set = firstSet.at(j);
 				if (set.rule != lambda) {
 					int column = getColumn(set.rule);
-					Table[row][column] = Rules->at(i)->children.at(set.index);
+					if (Table[row][column].size() == 0) {
+						Table[row][column] = Rules->at(i)->children.at(
+								set.index);
+					}else {
+						cout<<"not ll1 grammer"<<endl;
+					}
 				}
 			}
 			vector<Rule *> followSet = Rules->at(i)->follow.followTerminals;
@@ -249,7 +253,11 @@ int parseTablebuilder::getColumn(Rule * r) {
 	return -1;
 }
 void parseTablebuilder::printer() {
+	static ofstream tbl;
+	static char* steps_file = "parse table.txt";
+	tbl.open(steps_file);
 	cout << "First SET " << endl;
+
 	for (int i = 0; i < Rules->size(); ++i)
 		if (!Rules->at(i)->isTerminal) {
 			FirstSet f = Rules->at(i)->first;
@@ -277,24 +285,33 @@ void parseTablebuilder::printer() {
 	cout
 			<< "-----------------------------Table---------------------------------------"
 			<< endl;
+	tbl
+			<< "-----------------------------Table---------------------------------------"
+			<< endl;
 
 	for (int i = 0; i < nonTerminals.size(); i++) {
 		cout << nonTerminals.at(i)->name << " :" << endl;
+		tbl << nonTerminals.at(i)->name << " :" << endl;
 		for (int j = 0; j < terminals.size(); j++) {
 			vector<Rule *> cell = Table[i][j];
 			cout << "		For Terminal" << terminals.at(j)->name << ": of size "
 					<< cell.size() << " ::";
+			tbl << "		For Terminal" << terminals.at(j)->name << ": of size "
+					<< cell.size() << " ::";
 
 			for (int p = 0; p < cell.size(); p++) {
 				cout << cell.at(p)->name << ",";
+				tbl << cell.at(p)->name << ",";
 			}
 			cout << endl;
+			tbl << endl;
 		}
 		cout << endl;
+		tbl << endl;
 	}
-
+	tbl.close();
 }
 parseTablebuilder::~parseTablebuilder() {
-// TODO Auto-generated destructor stub
+	// TODO Auto-generated destructor stub
 }
 
