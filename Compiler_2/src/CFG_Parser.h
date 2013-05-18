@@ -27,6 +27,9 @@ public:
 	void printOut();
 	void left_factoring();
 	void left_recursion();
+	vector<string> realOrder;
+	vector<Rule*> tempRules;
+	void reOrderRulesTables();
 	bool compare(vector<Rule*>* first, vector<Rule*>* second, int length);
 	virtual ~CFG_Parser();
 };
