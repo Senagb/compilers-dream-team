@@ -61,11 +61,13 @@ void CFG_Parser::startParser()
 
 		}
 
+		reOrderRulesTables();
 		myfile.close();
 	}
 
 	else
 		cout << "Unable to open file";
+
 
 }
 
@@ -88,6 +90,8 @@ void CFG_Parser::parse_Line(string line)
 	i++;
 	i++;
 	i++;
+
+	realOrder.push_back(newName);
 
 	int index = getIndexIntable(newName);
 	if (index == -1)
@@ -223,6 +227,29 @@ void CFG_Parser::parse_Line(string line)
 	}
 
 }
+
+void CFG_Parser::reOrderRulesTables(){
+
+	int i = 0;
+	int indexOfRuleInRulesTable = 0;
+	for (i = 0; i < realOrder.size()    ; ++i) {
+		indexOfRuleInRulesTable = getIndexIntable(realOrder.at(i));
+		tempRules.push_back(rulesTable.at(indexOfRuleInRulesTable));
+	}
+	int j = 0;
+
+
+	for (j = 0; j < rulesTable.size(); ++j) {
+		if(rulesTable.at(j)->isTerminal){
+			tempRules.push_back(rulesTable.at(j));
+		}
+	}
+
+	rulesTable = tempRules;
+
+}
+
+
 int CFG_Parser::getIndexIntable(string name)
 {
 	unsigned int i = 0;
