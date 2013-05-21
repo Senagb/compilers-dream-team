@@ -50,23 +50,6 @@ int main() {
 	builder.printer();
 	cout << "p_Simulator Creation" << endl;
 
-//	vector<string> k = vector<string>();
-//	k.push_back("'('");
-//	k.push_back("'('");
-//
-//	k.push_back("'a'");
-//
-//	k.push_back("'+'");
-//	k.push_back("')'");
-//
-//	k.push_back("'+'");
-//
-//	k.push_back("'a'");
-//
-//	k.push_back("')'");
-//
-//	k.push_back("'$'");
-
 	p_Simulator p_sim = p_Simulator(&builder, k);
 	cout << "Start Simulation" << endl;
 	p_sim.simulate();
